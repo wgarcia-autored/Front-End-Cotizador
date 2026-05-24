@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador AD BOMESCO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #1a1a2e;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Formulario de cotización */
+        .quotation-form {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* Búsqueda */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-bar button {
+            padding: 12px 24px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .search-bar button:hover {
+            background: #1557b0;
+        }
+
+        .customer-type {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px 0;
+        }
+
+        .customer-type label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        /* Tabla de resultados */
+        .results-table {
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .add-to-cart {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .add-to-cart:hover {
+            background: #1e7e34;
+        }
+
+        /* Carrito */
+        .cart-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .cart-section h3 {
+            margin-bottom: 15px;
+            color: #1a1a2e;
+        }
+
+        .cart-table {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .cart-total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            padding-top: 10px;
+            border-top: 2px solid #eee;
+        }
+
+        .remove-item {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .generate-quote {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .generate-quote:hover {
+            background: #e0a800;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .stock-low {
+            color: #e67e22;
+            font-weight: 600;
+        }
+
+        .stock-out {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Cotizador AD BOMESCO</h1>
+            <p>Sistema de cotizaciones inteligentes</p>
+        </div>
+
+        <!-- Datos de la cotización -->
+        <div class="quotation-form">
+            <h3 style="margin-bottom: 15px;">📋 Datos de la cotización</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Cliente</label>
+                    <input type="text" id="clientName" placeholder="Nombre del cliente">
+                </div>
+                <div class="form-group">
+                    <label>Vendedor</label>
+                    <input type="text" id="sellerName" placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label>Forma de pago</label>
+                    <select id="paymentTerms">
+                        <option value="Al contado">Al contado</option>
+                        <option value="Crédito 30 días">Crédito 30 días</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Lugar de entrega</label>
+                    <select id="deliveryPlace">
+                        <option value="En almacenes de AD BOMESCO">En almacenes AD BOMESCO</option>
+                        <option value="En almacenes del cliente">En almacenes del cliente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Aclaraciones</label>
+                    <input type="text" id="clarifications" placeholder="Opcional">
+                </div>
+            </div>
+        </div>
+
+        <!-- Búsqueda de productos -->
+        <div class="search-section">
+            <h3 style="margin-bottom: 15px;">🔍 Buscar productos</h3>
+            <div class="customer-type">
+                <label>
+                    <input type="radio" name="customerType" value="FINAL" checked> Cliente Final
+                </label>
+                <label>
+                    <input type="radio" name="customerType" value="CANAL"> Canal
+                </label>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar por nombre, referencia interna o código de fábrica...">
+                <button id="searchBtn">Buscar</button>
+            </div>
+            <div id="resultsContainer">
+                <div class="loading">Ingresa un término de búsqueda</div>
+            </div>
+        </div>
+
+        <!-- Carrito de compras -->
+        <div class="cart-section">
+            <h3>🛒 Carrito de cotización</h3>
+            <div id="cartContainer">
+                <p>No hay productos agregados</p>
+            </div>
+            <button id="generateQuoteBtn" class="generate-quote">📄 Generar Cotización (Word)</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuración
+        const WEBHOOK_URL = 'https://deflate-shawl-quadrant.ngrok-free.dev/webhook/search-products';
+        
+        // Estado
+        let cart = [];
+        let currentResults = [];
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const cartContainer = document.getElementById('cartContainer');
+        const generateQuoteBtn = document.getElementById('generateQuoteBtn');
+
+        // Obtener tipo de cliente seleccionado
+        function getCustomerType() {
+            const selected = document.querySelector('input[name="customerType"]:checked');
+            return selected ? selected.value : 'FINAL';
+        }
+
+        // Buscar productos
+        async function searchProducts() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                resultsContainer.innerHTML = '<div class="loading">Ingresa un término de búsqueda</div>';
+                return;
+            }
+
+            resultsContainer.innerHTML = '<div class="loading">Buscando...</div>';
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        customer_type: getCustomerType()
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.products && data.products.length > 0) {
+                    currentResults = data.products;
+                    displayResults(data.products);
+                } else {
+                    resultsContainer.innerHTML = '<div class="loading">No se encontraron productos</div>';
+                    currentResults = [];
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultsContainer.innerHTML = '<div class="error">Error al buscar productos. Verifica la conexión con n8n.</div>';
+            }
+        }
+
+        // Mostrar resultados
+        function displayResults(products) {
+            if (!products || products.length === 0) {
+                resultsContainer.innerHTML = '<div class="loading">No se encontraron productos</div>';
+                return;
+            }
+
+            const html = `
+                <div class="results-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Referencia</th>
+                                <th>Producto</th>
+                                <th>Marca</th>
+                                <th>Stock</th>
+                                <th>Precio Bs.</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${products.map(product => `
+                                <tr>
+                                    <td>${product.reference_internal || ''}</td>
+                                    <td>${product.name || ''}</td>
+                                    <td>${product.familia || ''}</td>
+                                    <td class="${product.stock === 0 ? 'stock-out' : (product.stock < 5 ? 'stock-low' : '')}">${product.stock || 0}</td>
+                                    <td>${formatPrice(product.price || 0)}</td>
+                                    <td><button class="add-to-cart" onclick="addToCart('${product.reference_internal}')">➕ Agregar</button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            resultsContainer.innerHTML = html;
+        }
+
+        // Formatear precio
+        function formatPrice(price) {
+            return new Intl.NumberFormat('es-BO', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(price);
+        }
+
+        // Agregar al carrito
+        function addToCart(reference) {
+            const product = currentResults.find(p => p.reference_internal === reference);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.reference_internal === reference);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({
+                    reference_internal: product.reference_internal,
+                    name: product.name,
+                    familia: product.familia,
+                    price: product.price,
+                    quantity: 1,
+                    stock: product.stock
+                });
+            }
+            
+            displayCart();
+            saveCartToLocalStorage();
+        }
+
+        // Eliminar del carrito
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            displayCart();
+            saveCartToLocalStorage();
+        }
+
+        // Actualizar cantidad
+        function updateQuantity(index, newQuantity) {
+            if (newQuantity < 1) {
+                removeFromCart(index);
+                return;
+            }
+            
+            const maxStock = cart[index].stock;
+            if (newQuantity > maxStock && maxStock > 0) {
+                newQuantity = maxStock;
+            }
+            
+            cart[index].quantity = newQuantity;
+            displayCart();
+            saveCartToLocalStorage();
+        }
+
+        // Mostrar carrito
+        function displayCart() {
+            if (!cartContainer) return;
+
+            if (cart.length === 0) {
+                cartContainer.innerHTML = '<p>No hay productos agregados</p>';
+                return;
+            }
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            const html = `
+                <div class="results-table">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Marca</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unit.</th>
+                                <th>Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${cart.map((item, index) => `
+                                <tr>
+                                    <td>${item.name || ''}</td>
+                                    <td>${item.familia || ''}</td>
+                                    <td>
+                                        <button onclick="updateQuantity(${index}, ${item.quantity - 1})" style="padding:2px 6px;">-</button>
+                                        <span style="margin:0 8px;">${item.quantity}</span>
+                                        <button onclick="updateQuantity(${index}, ${item.quantity + 1})" style="padding:2px 6px;">+</button>
+                                    </td>
+                                    <td>${formatPrice(item.price)}</td>
+                                    <td>${formatPrice(item.price * item.quantity)}</td>
+                                    <td><button class="remove-item" onclick="removeFromCart(${index})">✖</button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="cart-total">
+                        Total: ${formatPrice(total)}
+                    </div>
+                </div>
+            `;
+            cartContainer.innerHTML = html;
+        }
+
+        // Guardar carrito en localStorage
+        function saveCartToLocalStorage() {
+            localStorage.setItem('quotationCart', JSON.stringify(cart));
+        }
+
+        // Cargar carrito desde localStorage
+        function loadCartFromLocalStorage() {
+            const saved = localStorage.getItem('quotationCart');
+            if (saved) {
+                try {
+                    cart = JSON.parse(saved);
+                    displayCart();
+                } catch (e) {
+                    console.error('Error loading cart:', e);
+                }
+            }
+        }
+
+        // Generar cotización (enviar a n8n para crear Word)
+        async function generateQuotation() {
+            const clientName = document.getElementById('clientName')?.value || 'Cliente';
+            const sellerName = document.getElementById('sellerName')?.value || 'Vendedor';
+            const paymentTerms = document.getElementById('paymentTerms')?.value || 'Al contado';
+            const deliveryPlace = document.getElementById('deliveryPlace')?.value || 'En almacenes de AD BOMESCO';
+            const clarifications = document.getElementById('clarifications')?.value || '';
+            
+            if (cart.length === 0) {
+                alert('Agrega productos al carrito primero');
+                return;
+            }
+
+            const quotationRef = `ADWG-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}`;
+            
+            const quotationData = {
+                quotation_ref: quotationRef,
+                client: {
+                    name: clientName,
+                    type: getCustomerType()
+                },
+                seller: sellerName,
+                date: new Date().toISOString().split('T')[0],
+                validity_days: 7,
+                payment_terms: paymentTerms,
+                delivery_place: deliveryPlace,
+                clarifications: clarifications,
+                items: cart.map((item, idx) => ({
+                    item: idx + 1,
+                    reference_internal: item.reference_internal,
+                    name: item.name,
+                    familia: item.familia,
+                    quantity: item.quantity,
+                    unit_price: item.price,
+                    total_price: item.price * item.quantity,
+                    delivery_time: 'VERIFICAR'
+                })),
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            };
+
+            // Aquí llamarías a tu webhook de generación de Word
+            // Por ahora, mostramos los datos y guardamos localmente
+            console.log('Datos de cotización:', quotationData);
+            
+            // Guardar en localStorage como respaldo
+            const quotations = JSON.parse(localStorage.getItem('quotations') || '[]');
+            quotations.push(quotationData);
+            localStorage.setItem('quotations', JSON.stringify(quotations));
+            
+            // Mostrar éxito y ofrecer descargar JSON (temporal hasta tener webhook de Word)
+            alert(`Cotización ${quotationRef} generada!\n\nTotal: ${formatPrice(quotationData.total)} Bs.\n\nLos datos se han guardado localmente.`);
+            
+            // Preguntar si quiere limpiar carrito
+            if (confirm('¿Deseas limpiar el carrito para una nueva cotización?')) {
+                cart = [];
+                displayCart();
+                saveCartToLocalStorage();
+            }
+        }
+
+        // Event listeners
+        searchBtn.addEventListener('click', searchProducts);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchProducts();
+        });
+        generateQuoteBtn.addEventListener('click', generateQuotation);
+
+        // Inicializar
+        loadCartFromLocalStorage();
+        
+        // Radio buttons para actualizar precios si es necesario
+        document.querySelectorAll('input[name="customerType"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (currentResults.length > 0) {
+                    displayResults(currentResults);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
