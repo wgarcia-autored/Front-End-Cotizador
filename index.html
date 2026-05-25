@@ -22,7 +22,6 @@
             margin: 0 auto;
         }
 
-        /* Header y formulario */
         .header, .quotation-form, .search-section, .cart-section {
             background: white;
             padding: 20px;
@@ -54,7 +53,6 @@
             border-radius: 6px;
         }
 
-        /* Layout de filtros */
         .filters-layout {
             display: flex;
             gap: 20px;
@@ -71,7 +69,6 @@
             min-width: 300px;
         }
 
-        /* Estilos de filtros */
         .filter-card {
             background: #f8f9fa;
             border-radius: 8px;
@@ -95,7 +92,6 @@
             margin-bottom: 8px;
         }
 
-        /* Slider de precio */
         .price-range {
             display: flex;
             gap: 10px;
@@ -106,7 +102,6 @@
             width: 100px;
         }
 
-        /* Filtros personalizados */
         .custom-filter-row {
             display: flex;
             gap: 8px;
@@ -143,7 +138,6 @@
             color: #dc3545;
         }
 
-        /* Resultados */
         .results-header {
             display: flex;
             justify-content: space-between;
@@ -183,7 +177,6 @@
             background: #f8f9fa;
             font-weight: 600;
             cursor: pointer;
-            user-select: none;
         }
 
         th:hover {
@@ -202,7 +195,6 @@
         .stock-low { color: #e67e22; font-weight: 600; }
         .stock-out { color: #e74c3c; font-weight: 600; }
 
-        /* Paginación */
         .pagination {
             display: flex;
             justify-content: center;
@@ -225,7 +217,6 @@
             border-color: #1a73e8;
         }
 
-        /* Carrito */
         .cart-item {
             display: flex;
             justify-content: space-between;
@@ -322,7 +313,6 @@
         <div class="search-section">
             <h3>🔍 Buscar productos</h3>
             
-            <!-- Tipo de cliente -->
             <div style="margin-bottom: 15px;">
                 <label style="margin-right: 15px;">
                     <input type="radio" name="customerType" value="FINAL" checked> Cliente Final
@@ -333,18 +323,15 @@
             </div>
 
             <div class="filters-layout">
-                <!-- Sidebar de filtros -->
                 <div class="filters-sidebar">
                     <button id="clearFiltersBtn" class="clear-filters">🗑️ Limpiar todos los filtros</button>
                     
-                    <!-- Búsqueda por palabra clave -->
                     <div class="filter-card">
                         <h4>🔎 Búsqueda por palabra clave</h4>
                         <input type="text" id="keywordSearch" placeholder="Ej: UPS 10KVA portátil">
                         <small style="color:#666;">Busca en todos los campos</small>
                     </div>
 
-                    <!-- Filtro por Marca -->
                     <div class="filter-card">
                         <h4>🏷️ Marca</h4>
                         <select id="marcaFilter">
@@ -352,7 +339,6 @@
                         </select>
                     </div>
 
-                    <!-- Filtro por Familia -->
                     <div class="filter-card">
                         <h4>📁 Familia</h4>
                         <select id="familiaFilter">
@@ -360,7 +346,6 @@
                         </select>
                     </div>
 
-                    <!-- Filtro por Grupo -->
                     <div class="filter-card">
                         <h4>📂 Grupo</h4>
                         <select id="grupoFilter">
@@ -368,7 +353,6 @@
                         </select>
                     </div>
 
-                    <!-- Filtro de precio (slider) -->
                     <div class="filter-card">
                         <h4>💰 Rango de precio</h4>
                         <div class="price-range">
@@ -376,10 +360,8 @@
                             <span>-</span>
                             <input type="number" id="maxPrice" placeholder="Máx">
                         </div>
-                        <input type="range" id="priceSlider" style="width: 100%; margin-top: 10px;">
                     </div>
 
-                    <!-- Filtro de stock -->
                     <div class="filter-card">
                         <h4>📦 Stock</h4>
                         <select id="stockFilter">
@@ -390,7 +372,6 @@
                         </select>
                     </div>
 
-                    <!-- Filtros personalizados -->
                     <div class="filter-card">
                         <h4>⚙️ Filtro personalizado</h4>
                         <div class="custom-filter-row">
@@ -419,12 +400,11 @@
                     </div>
                 </div>
 
-                <!-- Resultados principales -->
                 <div class="filters-main">
                     <div class="results-header">
                         <div class="results-count" id="resultsCount">0 productos encontrados</div>
                         <select id="sortBy" class="sort-select">
-                            <option value="name_asc">Ordenar por: Nombre (A-Z)</option>
+                            <option value="name_asc">Nombre (A-Z)</option>
                             <option value="name_desc">Nombre (Z-A)</option>
                             <option value="price_asc">Precio (menor a mayor)</option>
                             <option value="price_desc">Precio (mayor a menor)</option>
@@ -448,9 +428,6 @@
     </div>
 
     <script>
-        // ==============================================
-        // CONFIGURACIÓN
-        // ==============================================
         const API_URL = 'https://deflate-shawl-quadrant.ngrok-free.dev/webhook/all-products';
         
         let allProducts = [];
@@ -460,172 +437,44 @@
         let currentPage = 1;
         const itemsPerPage = 20;
         
-        // Rangos para sliders
         let globalMinPrice = 0;
         let globalMaxPrice = 100000;
-        
-        // Elementos DOM
-        const keywordSearch = document.getElementById('keywordSearch');
-        const marcaFilter = document.getElementById('marcaFilter');
-        const familiaFilter = document.getElementById('familiaFilter');
-        const grupoFilter = document.getElementById('grupoFilter');
-        const minPrice = document.getElementById('minPrice');
-        const maxPrice = document.getElementById('maxPrice');
-        const priceSlider = document.getElementById('priceSlider');
-        const stockFilter = document.getElementById('stockFilter');
-        const sortBy = document.getElementById('sortBy');
-        const resultsContainer = document.getElementById('resultsContainer');
-        const resultsCount = document.getElementById('resultsCount');
-        const pagination = document.getElementById('pagination');
-        const cartContainer = document.getElementById('cartContainer');
-        const activeFiltersDiv = document.getElementById('activeFilters');
-        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
 
-        // ==============================================
-        // CARGA DE DATOS
-        // ==============================================
         async function loadProducts() {
             try {
-                const response = await fetch(API_URL, { method: 'GET' });
+                const response = await fetch(API_URL);
                 const data = await response.json();
-                
                 allProducts = data.products || [];
-                
-                // Cargar opciones de filtros
                 const filters = data.filters || {};
                 
-                // Cargar marcas
                 if (filters.marcas) {
-                    marcaFilter.innerHTML = '<option value="">Todas las marcas</option>' + 
+                    document.getElementById('marcaFilter').innerHTML = '<option value="">Todas las marcas</option>' + 
                         filters.marcas.map(m => `<option value="${m}">${m}</option>`).join('');
                 }
-                
-                // Cargar familias
                 if (filters.familias) {
-                    familiaFilter.innerHTML = '<option value="">Todas las familias</option>' + 
+                    document.getElementById('familiaFilter').innerHTML = '<option value="">Todas las familias</option>' + 
                         filters.familias.map(f => `<option value="${f}">${f}</option>`).join('');
                 }
-                
-                // Cargar grupos
-                if (filter.grupos) {
-                    grupoFilter.innerHTML = '<option value="">Todos los grupos</option>' + 
+                if (filters.grupos) {
+                    document.getElementById('grupoFilter').innerHTML = '<option value="">Todos los grupos</option>' + 
                         filters.grupos.map(g => `<option value="${g}">${g}</option>`).join('');
                 }
-                
-                // Configurar rangos de precio
                 if (filters.priceRange) {
                     globalMinPrice = filters.priceRange.min;
                     globalMaxPrice = filters.priceRange.max;
-                    minPrice.value = globalMinPrice;
-                    maxPrice.value = globalMaxPrice;
-                    priceSlider.min = globalMinPrice;
-                    priceSlider.max = globalMaxPrice;
-                    priceSlider.value = globalMaxPrice;
+                    document.getElementById('minPrice').value = globalMinPrice;
+                    document.getElementById('maxPrice').value = globalMaxPrice;
                 }
-                
                 applyFilters();
             } catch (error) {
-                console.error('Error cargando productos:', error);
-                resultsContainer.innerHTML = '<div class="loading">Error al cargar productos. Verifica la conexión.</div>';
+                console.error('Error:', error);
+                document.getElementById('resultsContainer').innerHTML = '<div class="loading">Error al cargar productos</div>';
             }
         }
 
-        // ==============================================
-        // FILTRADO
-        // ==============================================
         function getCustomerType() {
             const selected = document.querySelector('input[name="customerType"]:checked');
             return selected ? selected.value : 'FINAL';
-        }
-
-        function applyFilters() {
-            let results = [...allProducts];
-            
-            // 1. Búsqueda por palabra clave
-            const keyword = keywordSearch.value.trim().toLowerCase();
-            if (keyword) {
-                const palabras = keyword.split(/\s+/);
-                results = results.filter(product => {
-                    const textoBusqueda = [
-                        product.reference_internal || '',
-                        product.cod_fabrica || '',
-                        product.name || '',
-                        product.familia || '',
-                        product.grupo || '',
-                        product.subgrupo || ''
-                    ].join(' ').toLowerCase();
-                    
-                    return palabras.every(palabra => textoBusqueda.includes(palabra));
-                });
-            }
-            
-            // 2. Filtro por marca
-            const marca = marcaFilter.value;
-            if (marca) {
-                results = results.filter(p => p.familia === marca);
-            }
-            
-            // 3. Filtro por familia
-            const familia = familiaFilter.value;
-            if (familia) {
-                results = results.filter(p => p.grupo === familia);
-            }
-            
-            // 4. Filtro por grupo
-            const grupo = grupoFilter.value;
-            if (grupo) {
-                results = results.filter(p => p.subgrupo === grupo);
-            }
-            
-            // 5. Filtro de precio
-            const minP = parseFloat(minPrice.value) || globalMinPrice;
-            const maxP = parseFloat(maxPrice.value) || globalMaxPrice;
-            results = results.filter(p => {
-                const price = getProductPrice(p);
-                return price >= minP && price <= maxP;
-            });
-            
-            // 6. Filtro de stock
-            const stockOpt = stockFilter.value;
-            if (stockOpt === 'instock') {
-                results = results.filter(p => p.stock > 0);
-            } else if (stockOpt === 'lowstock') {
-                results = results.filter(p => p.stock > 0 && p.stock < 5);
-            } else if (stockOpt === 'outofstock') {
-                results = results.filter(p => p.stock === 0);
-            }
-            
-            // 7. Filtros personalizados
-            for (const filter of activeCustomFilters) {
-                results = results.filter(product => {
-                    let fieldValue = product[filter.field];
-                    let filterValue = filter.value;
-                    
-                    if (filter.field === 'stock' || filter.field === 'price') {
-                        fieldValue = parseFloat(fieldValue) || 0;
-                        filterValue = parseFloat(filterValue) || 0;
-                    } else {
-                        fieldValue = (fieldValue || '').toLowerCase();
-                        filterValue = filterValue.toLowerCase();
-                    }
-                    
-                    switch (filter.operator) {
-                        case 'contains': return fieldValue.toString().includes(filterValue);
-                        case 'not_contains': return !fieldValue.toString().includes(filterValue);
-                        case 'equals': return fieldValue.toString() === filterValue;
-                        case 'not_equals': return fieldValue.toString() !== filterValue;
-                        case 'greater': return fieldValue > filterValue;
-                        case 'less': return fieldValue < filterValue;
-                        default: return true;
-                    }
-                });
-            }
-            
-            filteredProducts = results;
-            resultsCount.textContent = `${filteredProducts.length} productos encontrados`;
-            
-            // Ordenar y mostrar
-            sortProducts();
         }
 
         function getProductPrice(product) {
@@ -633,96 +482,115 @@
             return customerType === 'CANAL' ? product.price_bs_channel : product.price_bs_final;
         }
 
-        // ==============================================
-        // ORDENAMIENTO
-        // ==============================================
-        function sortProducts() {
-            const sortValue = sortBy.value;
+        function applyFilters() {
+            let results = [...allProducts];
             
-            switch (sortValue) {
-                case 'name_asc':
-                    filteredProducts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                    break;
-                case 'name_desc':
-                    filteredProducts.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
-                    break;
-                case 'price_asc':
-                    filteredProducts.sort((a, b) => getProductPrice(a) - getProductPrice(b));
-                    break;
-                case 'price_desc':
-                    filteredProducts.sort((a, b) => getProductPrice(b) - getProductPrice(a));
-                    break;
-                case 'stock_desc':
-                    filteredProducts.sort((a, b) => (b.stock || 0) - (a.stock || 0));
-                    break;
+            const keyword = document.getElementById('keywordSearch').value.trim().toLowerCase();
+            if (keyword) {
+                const palabras = keyword.split(/\s+/);
+                results = results.filter(p => {
+                    const texto = [p.reference_internal, p.cod_fabrica, p.name, p.familia, p.grupo, p.subgrupo].join(' ').toLowerCase();
+                    return palabras.every(pal => texto.includes(pal));
+                });
             }
             
+            const marca = document.getElementById('marcaFilter').value;
+            if (marca) results = results.filter(p => p.familia === marca);
+            
+            const familia = document.getElementById('familiaFilter').value;
+            if (familia) results = results.filter(p => p.grupo === familia);
+            
+            const grupo = document.getElementById('grupoFilter').value;
+            if (grupo) results = results.filter(p => p.subgrupo === grupo);
+            
+            const minP = parseFloat(document.getElementById('minPrice').value) || globalMinPrice;
+            const maxP = parseFloat(document.getElementById('maxPrice').value) || globalMaxPrice;
+            results = results.filter(p => getProductPrice(p) >= minP && getProductPrice(p) <= maxP);
+            
+            const stockOpt = document.getElementById('stockFilter').value;
+            if (stockOpt === 'instock') results = results.filter(p => p.stock > 0);
+            else if (stockOpt === 'lowstock') results = results.filter(p => p.stock > 0 && p.stock < 5);
+            else if (stockOpt === 'outofstock') results = results.filter(p => p.stock === 0);
+            
+            for (const f of activeCustomFilters) {
+                results = results.filter(p => {
+                    let val = p[f.field];
+                    let filterVal = f.value;
+                    if (f.field === 'stock' || f.field === 'price') {
+                        val = parseFloat(val) || 0;
+                        filterVal = parseFloat(filterVal) || 0;
+                    } else {
+                        val = (val || '').toLowerCase();
+                        filterVal = filterVal.toLowerCase();
+                    }
+                    switch (f.operator) {
+                        case 'contains': return val.toString().includes(filterVal);
+                        case 'not_contains': return !val.toString().includes(filterVal);
+                        case 'equals': return val.toString() === filterVal;
+                        case 'not_equals': return val.toString() !== filterVal;
+                        case 'greater': return val > filterVal;
+                        case 'less': return val < filterVal;
+                        default: return true;
+                    }
+                });
+            }
+            
+            filteredProducts = results;
+            document.getElementById('resultsCount').textContent = `${filteredProducts.length} productos encontrados`;
+            sortProducts();
+        }
+
+        function sortProducts() {
+            const sortValue = document.getElementById('sortBy').value;
+            if (sortValue === 'name_asc') filteredProducts.sort((a,b) => (a.name || '').localeCompare(b.name || ''));
+            else if (sortValue === 'name_desc') filteredProducts.sort((a,b) => (b.name || '').localeCompare(a.name || ''));
+            else if (sortValue === 'price_asc') filteredProducts.sort((a,b) => getProductPrice(a) - getProductPrice(b));
+            else if (sortValue === 'price_desc') filteredProducts.sort((a,b) => getProductPrice(b) - getProductPrice(a));
+            else if (sortValue === 'stock_desc') filteredProducts.sort((a,b) => (b.stock || 0) - (a.stock || 0));
             currentPage = 1;
             displayResults();
         }
 
-        // ==============================================
-        // PAGINACIÓN Y VISUALIZACIÓN
-        // ==============================================
         function displayResults() {
             const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageProducts = filteredProducts.slice(start, end);
+            const pageProducts = filteredProducts.slice(start, start + itemsPerPage);
             const customerType = getCustomerType();
             
             if (pageProducts.length === 0) {
-                resultsContainer.innerHTML = '<div class="loading">No se encontraron productos</div>';
-                pagination.innerHTML = '';
+                document.getElementById('resultsContainer').innerHTML = '<div class="loading">No se encontraron productos</div>';
+                document.getElementById('pagination').innerHTML = '';
                 return;
             }
             
-            const html = `
-                <div class="results-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Referencia</th>
-                                <th>Producto</th>
-                                <th>Marca</th>
-                                <th>Stock</th>
-                                <th>Precio Bs.</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${pageProducts.map(product => {
-                                const price = getProductPrice(product);
-                                const stockClass = product.stock === 0 ? 'stock-out' : (product.stock < 5 ? 'stock-low' : '');
-                                return `
-                                    <tr data-ref="${product.reference_internal}">
-                                        <td>${product.reference_internal || ''}</td>
-                                        <td>${product.name || ''}</td>
-                                        <td>${product.familia || ''}</td>
-                                        <td class="${stockClass}">${product.stock || 0}</td>
-                                        <td>${formatPrice(price)}</td>
-                                        <td><button class="add-to-cart" data-ref="${product.reference_internal}">➕ Agregar</button></td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            resultsContainer.innerHTML = html;
+            const html = `<div class="results-table"><table><thead><tr>
+                <th>Referencia</th><th>Producto</th><th>Marca</th><th>Stock</th><th>Precio Bs.</th><th></th>
+            </tr></thead><tbody>
+                ${pageProducts.map(p => {
+                    const price = getProductPrice(p);
+                    const stockClass = p.stock === 0 ? 'stock-out' : (p.stock < 5 ? 'stock-low' : '');
+                    return `<tr>
+                        <td>${p.reference_internal || ''}</td>
+                        <td>${p.name || ''}</td>
+                        <td>${p.familia || ''}</td>
+                        <td class="${stockClass}">${p.stock || 0}</td>
+                        <td>${formatPrice(price)}</td>
+                        <td><button class="add-to-cart" data-ref="${p.reference_internal}">➕ Agregar</button></td>
+                    </tr>`;
+                }).join('')}
+            </tbody></table></div>`;
             
-            // Agregar event listeners a los botones
+            document.getElementById('resultsContainer').innerHTML = html;
+            
             document.querySelectorAll('.add-to-cart').forEach(btn => {
                 btn.addEventListener('click', () => addToCart(btn.getAttribute('data-ref')));
             });
             
-            // Actualizar paginación
             const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-            let paginationHtml = '';
+            let pagHtml = '';
             for (let i = 1; i <= Math.min(totalPages, 10); i++) {
-                paginationHtml += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                pagHtml += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
             }
-            pagination.innerHTML = paginationHtml;
-            
+            document.getElementById('pagination').innerHTML = pagHtml;
             document.querySelectorAll('#pagination button').forEach(btn => {
                 btn.addEventListener('click', () => {
                     currentPage = parseInt(btn.getAttribute('data-page'));
@@ -732,205 +600,114 @@
         }
 
         function formatPrice(price) {
-            return new Intl.NumberFormat('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price || 0);
+            return new Intl.NumberFormat('es-BO', { minimumFractionDigits: 2 }).format(price || 0);
         }
 
-        // ==============================================
-        // CARRITO
-        // ==============================================
-        function addToCart(reference) {
-            const product = filteredProducts.find(p => p.reference_internal === reference);
+        function addToCart(ref) {
+            const product = filteredProducts.find(p => p.reference_internal === ref);
             if (!product) return;
-            
             const price = getProductPrice(product);
-            const existing = cart.find(item => item.reference_internal === reference);
-            if (existing) {
-                existing.quantity++;
-            } else {
-                cart.push({
-                    reference_internal: product.reference_internal,
-                    name: product.name,
-                    familia: product.familia,
-                    price: price,
-                    quantity: 1,
-                    stock: product.stock
-                });
-            }
+            const existing = cart.find(i => i.reference_internal === ref);
+            if (existing) existing.quantity++;
+            else cart.push({ reference_internal: ref, name: product.name, price, quantity: 1, stock: product.stock });
             displayCart();
             saveCart();
         }
 
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            displayCart();
-            saveCart();
-        }
+        function removeFromCart(index) { cart.splice(index, 1); displayCart(); saveCart(); }
 
         function updateQuantity(index, delta) {
-            const newQuantity = cart[index].quantity + delta;
-            if (newQuantity < 1) {
-                removeFromCart(index);
-                return;
-            }
-            if (newQuantity > cart[index].stock && cart[index].stock > 0) return;
-            cart[index].quantity = newQuantity;
-            displayCart();
-            saveCart();
+            const newQ = cart[index].quantity + delta;
+            if (newQ < 1) removeFromCart(index);
+            else if (newQ <= cart[index].stock || cart[index].stock === 0) { cart[index].quantity = newQ; displayCart(); saveCart(); }
         }
 
         function displayCart() {
-            if (cart.length === 0) {
-                cartContainer.innerHTML = '<p>No hay productos agregados</p>';
-                return;
-            }
-            
+            if (cart.length === 0) { document.getElementById('cartContainer').innerHTML = '<p>No hay productos agregados</p>'; return; }
             let total = 0;
-            const itemsHtml = cart.map((item, index) => {
+            const html = cart.map((item, idx) => {
                 const subtotal = item.price * item.quantity;
                 total += subtotal;
-                return `
-                    <div class="cart-item">
-                        <div style="flex:3">${item.name}</div>
-                        <div style="flex:1">
-                            <button onclick="updateQuantity(${index}, -1)">-</button>
-                            ${item.quantity}
-                            <button onclick="updateQuantity(${index}, 1)">+</button>
-                        </div>
-                        <div style="flex:1">${formatPrice(item.price)}</div>
-                        <div style="flex:1">${formatPrice(subtotal)}</div>
-                        <button onclick="removeFromCart(${index})" style="background:#dc3545; color:white; border:none; padding:4px 8px; border-radius:4px;">✖</button>
-                    </div>
-                `;
+                return `<div class="cart-item">
+                    <div style="flex:3">${item.name}</div>
+                    <div style="flex:1"><button onclick="updateQuantity(${idx}, -1)">-</button> ${item.quantity} <button onclick="updateQuantity(${idx}, 1)">+</button></div>
+                    <div style="flex:1">${formatPrice(item.price)}</div>
+                    <div style="flex:1">${formatPrice(subtotal)}</div>
+                    <button onclick="removeFromCart(${idx})" style="background:#dc3545;color:white;border:none;padding:4px 8px;">✖</button>
+                </div>`;
             }).join('');
-            
-            cartContainer.innerHTML = `
-                ${itemsHtml}
-                <div class="cart-total">Total: ${formatPrice(total)}</div>
-            `;
+            document.getElementById('cartContainer').innerHTML = html + `<div class="cart-total">Total: ${formatPrice(total)}</div>`;
         }
 
-        function saveCart() {
-            localStorage.setItem('cotizacion_cart', JSON.stringify(cart));
-        }
+        function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
+        function loadCart() { const saved = localStorage.getItem('cart'); if (saved) { cart = JSON.parse(saved); displayCart(); } }
 
-        function loadCart() {
-            const saved = localStorage.getItem('cotizacion_cart');
-            if (saved) {
-                try {
-                    cart = JSON.parse(saved);
-                    displayCart();
-                } catch(e) {}
-            }
-        }
-
-        // ==============================================
-        // FILTROS PERSONALIZADOS
-        // ==============================================
         function addCustomFilter() {
             const field = document.getElementById('customField').value;
             const operator = document.getElementById('customOperator').value;
-            let value = document.getElementById('customValue').value;
-            
-            if (!value) {
-                alert('Ingrese un valor para el filtro');
-                return;
-            }
-            
+            const value = document.getElementById('customValue').value;
+            if (!value) { alert('Ingrese un valor'); return; }
             activeCustomFilters.push({ field, operator, value });
+            document.getElementById('customValue').value = '';
             updateActiveFiltersDisplay();
             applyFilters();
-            
-            document.getElementById('customValue').value = '';
         }
-        
+
         function updateActiveFiltersDisplay() {
-            if (activeCustomFilters.length === 0) {
-                activeFiltersDiv.innerHTML = '';
-                return;
-            }
-            
-            const operatorText = {
-                contains: 'contiene', not_contains: 'no contiene', equals: 'es igual a',
-                not_equals: 'no es igual a', greater: '>', less: '<'
-            };
-            
-            activeFiltersDiv.innerHTML = activeCustomFilters.map((filter, idx) => 
-                `<span class="filter-tag">${filter.field} ${operatorText[filter.operator]} "${filter.value}" <span class="remove" data-idx="${idx}">✖</span></span>`
-            ).join('');
-            
+            const container = document.getElementById('activeFilters');
+            if (activeCustomFilters.length === 0) { container.innerHTML = ''; return; }
+            const operatorText = { contains: 'contiene', not_contains: 'no contiene', equals: 'es igual a', not_equals: 'no es igual a', greater: '>', less: '<' };
+            container.innerHTML = activeCustomFilters.map((f, i) => `<span class="filter-tag">${f.field} ${operatorText[f.operator]} "${f.value}" <span class="remove" data-idx="${i}">✖</span></span>`).join('');
             document.querySelectorAll('.filter-tag .remove').forEach(el => {
-                el.addEventListener('click', () => {
-                    const idx = parseInt(el.getAttribute('data-idx'));
-                    activeCustomFilters.splice(idx, 1);
-                    updateActiveFiltersDisplay();
-                    applyFilters();
-                });
+                el.addEventListener('click', () => { activeCustomFilters.splice(parseInt(el.getAttribute('data-idx')), 1); updateActiveFiltersDisplay(); applyFilters(); });
             });
         }
 
-        // ==============================================
-        // LIMPIAR FILTROS
-        // ==============================================
         function clearAllFilters() {
-            keywordSearch.value = '';
-            marcaFilter.value = '';
-            familiaFilter.value = '';
-            grupoFilter.value = '';
-            minPrice.value = globalMinPrice;
-            maxPrice.value = globalMaxPrice;
-            stockFilter.value = '';
+            document.getElementById('keywordSearch').value = '';
+            document.getElementById('marcaFilter').value = '';
+            document.getElementById('familiaFilter').value = '';
+            document.getElementById('grupoFilter').value = '';
+            document.getElementById('minPrice').value = globalMinPrice;
+            document.getElementById('maxPrice').value = globalMaxPrice;
+            document.getElementById('stockFilter').value = '';
             activeCustomFilters = [];
             updateActiveFiltersDisplay();
             applyFilters();
         }
 
-        // ==============================================
-        // GENERAR COTIZACIÓN
-        // ==============================================
-        async function generateQuotation() {
-            if (cart.length === 0) {
-                alert('Agrega productos al carrito primero');
-                return;
-            }
-            
-            const quotationRef = `ADWG-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}`;
-            const quotationData = {
-                quotation_ref: quotationRef,
-                client: document.getElementById('clientName').value || 'Cliente',
-                seller: document.getElementById('sellerName').value || 'Vendedor',
-                date: new Date().toISOString().split('T')[0],
-                payment_terms: document.getElementById('paymentTerms').value,
-                delivery_place: document.getElementById('deliveryPlace').value,
-                clarifications: document.getElementById('clarifications').value || '',
-                customer_type: getCustomerType(),
-                items: cart.map((item, idx) => ({
-                    item: idx + 1,
-                    reference_internal: item.reference_internal,
-                    name: item.name,
-                    quantity: item.quantity,
-                    unit_price: item.price,
-                    total_price: item.price * item.quantity,
-                    delivery_time: 'VERIFICAR'
-                })),
-                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        function generateQuotation() {
+            if (cart.length === 0) { alert('Agrega productos al carrito'); return; }
+            const ref = `ADWG-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}`;
+            const data = {
+                quotation_ref: ref, client: document.getElementById('clientName').value, seller: document.getElementById('sellerName').value,
+                date: new Date().toISOString().split('T')[0], payment_terms: document.getElementById('paymentTerms').value,
+                delivery_place: document.getElementById('deliveryPlace').value, clarifications: document.getElementById('clarifications').value,
+                customer_type: getCustomerType(), items: cart.map((i, idx) => ({ item: idx+1, reference_internal: i.reference_internal, name: i.name, quantity: i.quantity, unit_price: i.price, total_price: i.price * i.quantity, delivery_time: 'VERIFICAR' })),
+                total: cart.reduce((s,i) => s + i.price * i.quantity, 0)
             };
-            
-            console.log('Cotización generada:', quotationData);
-            
-            const quotations = JSON.parse(localStorage.getItem('quotations') || '[]');
-            quotations.push(quotationData);
-            localStorage.setItem('quotations', JSON.stringify(quotations));
-            
-            alert(`Cotización ${quotationRef} generada!\nTotal: ${formatPrice(quotationData.total)} Bs.\n\nLos datos se han guardado localmente.`);
-            
-            if (confirm('¿Limpiar carrito para nueva cotización?')) {
-                cart = [];
-                displayCart();
-                saveCart();
-            }
+            const quotes = JSON.parse(localStorage.getItem('quotations') || '[]');
+            quotes.push(data);
+            localStorage.setItem('quotations', JSON.stringify(quotes));
+            alert(`Cotización ${ref} generada!\nTotal: ${formatPrice(data.total)} Bs.`);
+            if (confirm('¿Limpiar carrito?')) { cart = []; displayCart(); saveCart(); }
         }
 
-        // ==============================================
-        // EVENT LISTENERS
-        // ==============================================
-       
+        document.getElementById('keywordSearch').addEventListener('input', applyFilters);
+        document.getElementById('marcaFilter').addEventListener('change', applyFilters);
+        document.getElementById('familiaFilter').addEventListener('change', applyFilters);
+        document.getElementById('grupoFilter').addEventListener('change', applyFilters);
+        document.getElementById('minPrice').addEventListener('input', applyFilters);
+        document.getElementById('maxPrice').addEventListener('input', applyFilters);
+        document.getElementById('stockFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortBy').addEventListener('change', sortProducts);
+        document.getElementById('addCustomFilter').addEventListener('click', addCustomFilter);
+        document.getElementById('clearFiltersBtn').addEventListener('click', clearAllFilters);
+        document.getElementById('generateQuoteBtn').addEventListener('click', generateQuotation);
+        document.querySelectorAll('input[name="customerType"]').forEach(r => r.addEventListener('change', () => { applyFilters(); displayCart(); }));
+        
+        loadCart();
+        loadProducts();
+    </script>
+</body>
+</html>
