@@ -834,23 +834,68 @@ function escapeHtml(str) {
             applyFilters();
         }
 
-        function generateQuotation() {
-            if (cart.length === 0) { alert('Agrega productos al carrito'); return; }
-            const ref = `ADWG-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}`;
-            const data = {
-                quotation_ref: ref, client: document.getElementById('clientName').value, seller: document.getElementById('sellerName').value,
-                date: new Date().toISOString().split('T')[0], payment_terms: document.getElementById('paymentTerms').value,
-                delivery_place: document.getElementById('deliveryPlace').value, clarifications: document.getElementById('clarifications').value,
-                customer_type: getCustomerType(), items: cart.map((i, idx) => ({ item: idx+1, reference_internal: i.reference_internal, name: i.name, quantity: i.quantity, unit_price: i.price, total_price: i.price * i.quantity, delivery_time: 'VERIFICAR' })),
-                total: cart.reduce((s,i) => s + i.price * i.quantity, 0)
-            };
+async function generateQuotation() {
+    if (cart.length === 0) { alert('Agrega productos al carrito'); return; }
+    
+    const ref = `ADWG-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}`;
+    const data = {
+        quotation_ref: ref,
+        client: document.getElementById('clientName').value || 'Cliente',
+        seller: document.getElementById('sellerName').value || 'Vendedor',
+        date: new Date().toISOString().split('T')[0],
+        payment_terms: document.getElementById('paymentTerms').value,
+        delivery_place: document.getElementById('deliveryPlace').value,
+        clarifications: document.getElementById('clarifications').value,
+        customer_type: getCustomerType(),
+        items: cart.map((i, idx) => ({ 
+            item: idx+1, 
+            reference_internal: i.reference_internal, 
+            name: i.name, 
+            familia: i.familia,
+            quantity: i.quantity, 
+            unit_price: i.price, 
+            total_price: i.price * i.quantity, 
+            delivery_time: 'VERIFICAR' 
+        })),
+        total: cart.reduce((s,i) => s + i.price * i.quantity, 0)
+    };
+    
+    console.log('Enviando datos:', data);
+    
+    try {
+        const response = await fetch('https://deflate-shawl-quadrant.ngrok-free.dev/webhook/create-quotation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Respuesta:', result);
+        
+        if (result.success) {
+            alert(`✅ ${result.message}\n\nCotización: ${result.receivedData.quotation_ref}\nItems: ${result.receivedData.itemsCount}\nTotal: ${result.receivedData.total} Bs.`);
+            
+            // Guardar en localStorage
             const quotes = JSON.parse(localStorage.getItem('quotations') || '[]');
             quotes.push(data);
             localStorage.setItem('quotations', JSON.stringify(quotes));
-            alert(`Cotización ${ref} generada!\nTotal: ${formatPrice(data.total)} Bs.`);
-            if (confirm('¿Limpiar carrito?')) { cart = []; displayCart(); saveCart(); }
+            
+            if (confirm('¿Limpiar carrito para nueva cotización?')) {
+                cart = [];
+                displayCart();
+                saveCart();
+            }
+        } else {
+            alert('Error: ' + (result.message || ''));
         }
-
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al conectar con el servidor');
+    }
+}
         // ==============================================
         // EVENT LISTENERS
         // ==============================================
