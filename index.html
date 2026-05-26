@@ -428,6 +428,9 @@
     </div>
 
     <script>
+                // ==============================================
+        // CONFIGURACIÓN
+        // ==============================================
         const API_URL = 'https://deflate-shawl-quadrant.ngrok-free.dev/webhook/all-products';
         
         let allProducts = [];
@@ -440,43 +443,127 @@
         let globalMinPrice = 0;
         let globalMaxPrice = 100000;
 
-        async function loadProducts() {
-    try {
-        const response = await fetch(API_URL, {
-            method: 'GET',
-            headers: {
-                'ngrok-skip-browser-warning': 'true'
+        // ==============================================
+        // OBTENER OPCIONES DE FILTRO DEPENDIENTES
+        // ==============================================
+        function getFilterOptions(currentFilters) {
+            // Aplicar filtros actuales para obtener el conjunto de productos visible
+            let tempProducts = [...allProducts];
+            
+            // Aplicar filtros ya seleccionados (excluyendo el campo que estamos calculando)
+            if (currentFilters.marca && currentFilters.marca !== '') {
+                tempProducts = tempProducts.filter(p => p.familia === currentFilters.marca);
             }
-        });
-        const data = await response.json();
-        allProducts = data.products || [];
-        const filters = data.filters || {};
-        
-        if (filters.marcas) {
-            document.getElementById('marcaFilter').innerHTML = '<option value="">Todas las marcas</option>' + 
-                filters.marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+            if (currentFilters.familia && currentFilters.familia !== '') {
+                tempProducts = tempProducts.filter(p => p.grupo === currentFilters.familia);
+            }
+            if (currentFilters.grupo && currentFilters.grupo !== '') {
+                tempProducts = tempProducts.filter(p => p.subgrupo === currentFilters.grupo);
+            }
+            
+            // Extraer valores únicos para cada campo
+            const marcas = [...new Set(tempProducts.map(p => p.familia).filter(Boolean))].sort();
+            const familias = [...new Set(tempProducts.map(p => p.grupo).filter(Boolean))].sort();
+            const grupos = [...new Set(tempProducts.map(p => p.subgrupo).filter(Boolean))].sort();
+            
+            return { marcas, familias, grupos };
         }
-        if (filters.familias) {
-            document.getElementById('familiaFilter').innerHTML = '<option value="">Todas las familias</option>' + 
-                filters.familias.map(f => `<option value="${f}">${f}</option>`).join('');
-        }
-        if (filters.grupos) {
-            document.getElementById('grupoFilter').innerHTML = '<option value="">Todos los grupos</option>' + 
-                filters.grupos.map(g => `<option value="${g}">${g}</option>`).join('');
-        }
-        if (filters.priceRange) {
-            globalMinPrice = filters.priceRange.min;
-            globalMaxPrice = filters.priceRange.max;
-            document.getElementById('minPrice').value = globalMinPrice;
-            document.getElementById('maxPrice').value = globalMaxPrice;
-        }
-        applyFilters();
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('resultsContainer').innerHTML = '<div class="loading">Error al cargar productos</div>';
-    }
-}
 
+        // ==============================================
+        // ACTUALIZAR DROPDOWNS DE FILTROS
+        // ==============================================
+        function updateFilterOptions() {
+            const currentFilters = {
+                marca: document.getElementById('marcaFilter').value,
+                familia: document.getElementById('familiaFilter').value,
+                grupo: document.getElementById('grupoFilter').value
+            };
+            
+            const options = getFilterOptions(currentFilters);
+            
+            // Guardar valores seleccionados actuales
+            const selectedMarca = document.getElementById('marcaFilter').value;
+            const selectedFamilia = document.getElementById('familiaFilter').value;
+            const selectedGrupo = document.getElementById('grupoFilter').value;
+            
+            // Actualizar dropdown de marcas
+            const marcaSelect = document.getElementById('marcaFilter');
+            marcaSelect.innerHTML = '<option value="">Todas las marcas</option>' + 
+                options.marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+            marcaSelect.value = selectedMarca;
+            
+            // Actualizar dropdown de familias (dependiente de marca)
+            const familiaSelect = document.getElementById('familiaFilter');
+            let familiasDisponibles = options.familias;
+            if (selectedMarca) {
+                // Filtrar familias por la marca seleccionada
+                const productosMarca = allProducts.filter(p => p.familia === selectedMarca);
+                familiasDisponibles = [...new Set(productosMarca.map(p => p.grupo).filter(Boolean))].sort();
+            }
+            familiaSelect.innerHTML = '<option value="">Todas las familias</option>' + 
+                familiasDisponibles.map(f => `<option value="${f}">${f}</option>`).join('');
+            familiaSelect.value = selectedFamilia;
+            
+            // Actualizar dropdown de grupos (dependiente de marca y familia)
+            const grupoSelect = document.getElementById('grupoFilter');
+            let gruposDisponibles = options.grupos;
+            if (selectedMarca) {
+                let productosFiltro = allProducts.filter(p => p.familia === selectedMarca);
+                if (selectedFamilia) {
+                    productosFiltro = productosFiltro.filter(p => p.grupo === selectedFamilia);
+                }
+                gruposDisponibles = [...new Set(productosFiltro.map(p => p.subgrupo).filter(Boolean))].sort();
+            } else if (selectedFamilia) {
+                const productosFamilia = allProducts.filter(p => p.grupo === selectedFamilia);
+                gruposDisponibles = [...new Set(productosFamilia.map(p => p.subgrupo).filter(Boolean))].sort();
+            }
+            grupoSelect.innerHTML = '<option value="">Todos los grupos</option>' + 
+                gruposDisponibles.map(g => `<option value="${g}">${g}</option>`).join('');
+            grupoSelect.value = selectedGrupo;
+        }
+
+        // ==============================================
+        // CARGA DE DATOS
+        // ==============================================
+        async function loadProducts() {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                const data = await response.json();
+                allProducts = data.products || [];
+                const filters = data.filters || {};
+                
+                if (filters.priceRange) {
+                    globalMinPrice = filters.priceRange.min;
+                    globalMaxPrice = filters.priceRange.max;
+                    document.getElementById('minPrice').value = globalMinPrice;
+                    document.getElementById('maxPrice').value = globalMaxPrice;
+                }
+                
+                // Inicializar los dropdowns
+                updateFilterOptions();
+                applyFilters();
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('resultsContainer').innerHTML = '<div class="loading">Error al cargar productos</div>';
+            }
+        }
+
+        // ==============================================
+        // MANEJADORES DE EVENTOS PARA FILTROS
+        // ==============================================
+        function onFilterChange() {
+            updateFilterOptions();
+            applyFilters();
+        }
+
+        // ==============================================
+        // RESTO DE FUNCIONES (sin cambios)
+        // ==============================================
         function getCustomerType() {
             const selected = document.querySelector('input[name="customerType"]:checked');
             return selected ? selected.value : 'FINAL';
@@ -567,7 +654,7 @@
                 return;
             }
             
-            const html = `<div class="results-table"><table><thead><tr>
+            const html = `<div class="results-table"></table><thead><tr>
                 <th>Referencia</th><th>Producto</th><th>Marca</th><th>Stock</th><th>Precio Bs.</th><th></th>
             </tr></thead><tbody>
                 ${pageProducts.map(p => {
@@ -678,6 +765,7 @@
             document.getElementById('stockFilter').value = '';
             activeCustomFilters = [];
             updateActiveFiltersDisplay();
+            updateFilterOptions();
             applyFilters();
         }
 
@@ -698,10 +786,13 @@
             if (confirm('¿Limpiar carrito?')) { cart = []; displayCart(); saveCart(); }
         }
 
+        // ==============================================
+        // EVENT LISTENERS
+        // ==============================================
         document.getElementById('keywordSearch').addEventListener('input', applyFilters);
-        document.getElementById('marcaFilter').addEventListener('change', applyFilters);
-        document.getElementById('familiaFilter').addEventListener('change', applyFilters);
-        document.getElementById('grupoFilter').addEventListener('change', applyFilters);
+        document.getElementById('marcaFilter').addEventListener('change', onFilterChange);
+        document.getElementById('familiaFilter').addEventListener('change', onFilterChange);
+        document.getElementById('grupoFilter').addEventListener('change', onFilterChange);
         document.getElementById('minPrice').addEventListener('input', applyFilters);
         document.getElementById('maxPrice').addEventListener('input', applyFilters);
         document.getElementById('stockFilter').addEventListener('change', applyFilters);
