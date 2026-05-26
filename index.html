@@ -643,53 +643,98 @@
             displayResults();
         }
 
-        function displayResults() {
-            const start = (currentPage - 1) * itemsPerPage;
-            const pageProducts = filteredProducts.slice(start, start + itemsPerPage);
-            const customerType = getCustomerType();
-            
-            if (pageProducts.length === 0) {
-                document.getElementById('resultsContainer').innerHTML = '<div class="loading">No se encontraron productos</div>';
-                document.getElementById('pagination').innerHTML = '';
-                return;
-            }
-            
-            const html = `<div class="results-table"></table><thead><tr>
-                <th>Referencia</th><th>Producto</th><th>Marca</th><th>Stock</th><th>Precio Bs.</th><th></th>
-            </tr></thead><tbody>
-                ${pageProducts.map(p => {
-                    const price = getProductPrice(p);
-                    const stockClass = p.stock === 0 ? 'stock-out' : (p.stock < 5 ? 'stock-low' : '');
-                    return `<tr>
-                        <td>${p.reference_internal || ''}</td>
-                        <td>${p.name || ''}</td>
-                        <td>${p.familia || ''}</td>
-                        <td class="${stockClass}">${p.stock || 0}</td>
-                        <td>${formatPrice(price)}</td>
-                        <td><button class="add-to-cart" data-ref="${p.reference_internal}">➕ Agregar</button></td>
-                    </tr>`;
-                }).join('')}
-            </tbody></table></div>`;
-            
-            document.getElementById('resultsContainer').innerHTML = html;
-            
-            document.querySelectorAll('.add-to-cart').forEach(btn => {
-                btn.addEventListener('click', () => addToCart(btn.getAttribute('data-ref')));
-            });
-            
-            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-            let pagHtml = '';
-            for (let i = 1; i <= Math.min(totalPages, 10); i++) {
-                pagHtml += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
-            }
-            document.getElementById('pagination').innerHTML = pagHtml;
-            document.querySelectorAll('#pagination button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    currentPage = parseInt(btn.getAttribute('data-page'));
-                    displayResults();
-                });
-            });
+       function displayResults() {
+    const start = (currentPage - 1) * itemsPerPage;
+    const pageProducts = filteredProducts.slice(start, start + itemsPerPage);
+    const customerType = getCustomerType();
+    
+    if (pageProducts.length === 0) {
+        document.getElementById('resultsContainer').innerHTML = '<div class="loading">No se encontraron productos</div>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+    }
+    
+    // Construir la tabla correctamente
+    let tableHtml = `
+        <div class="results-table">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                        <th style="padding: 12px; text-align: left;">Referencia</th>
+                        <th style="padding: 12px; text-align: left;">Producto</th>
+                        <th style="padding: 12px; text-align: left;">Marca</th>
+                        <th style="padding: 12px; text-align: left;">Stock</th>
+                        <th style="padding: 12px; text-align: left;">Precio Bs.</th>
+                        <th style="padding: 12px; text-align: center;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    for (const product of pageProducts) {
+        const price = getProductPrice(product);
+        const stockClass = product.stock === 0 ? 'stock-out' : (product.stock < 5 ? 'stock-low' : '');
+        
+        tableHtml += `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px;">${escapeHtml(product.reference_internal || '')}</td>
+                <td style="padding: 10px;">${escapeHtml(product.name || '')}</td>
+                <td style="padding: 10px;">${escapeHtml(product.familia || '')}</td>
+                <td style="padding: 10px;" class="${stockClass}">${product.stock || 0}</td>
+                <td style="padding: 10px;">${formatPrice(price)}</td>
+                <td style="padding: 10px; text-align: center;">
+                    <button class="add-to-cart" data-ref="${escapeHtml(product.reference_internal)}" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                        ➕ Agregar
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+    
+    tableHtml += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    document.getElementById('resultsContainer').innerHTML = tableHtml;
+    
+    // Agregar event listeners a los botones
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', () => addToCart(btn.getAttribute('data-ref')));
+    });
+    
+    // Paginación
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    if (totalPages > 1) {
+        let pagHtml = '<div class="pagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;">';
+        for (let i = 1; i <= Math.min(totalPages, 10); i++) {
+            pagHtml += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}" style="padding: 6px 12px; border: 1px solid #ddd; background: ${i === currentPage ? '#1a73e8' : 'white'}; color: ${i === currentPage ? 'white' : '#333'}; border-radius: 4px; cursor: pointer;">${i}</button>`;
         }
+        pagHtml += '</div>';
+        document.getElementById('pagination').innerHTML = pagHtml;
+        
+        document.querySelectorAll('#pagination button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentPage = parseInt(btn.getAttribute('data-page'));
+                displayResults();
+            });
+        });
+    } else {
+        document.getElementById('pagination').innerHTML = '';
+    }
+}
+
+// Función auxiliar para escapar HTML y evitar inyección
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
         function formatPrice(price) {
             return new Intl.NumberFormat('es-BO', { minimumFractionDigits: 2 }).format(price || 0);
