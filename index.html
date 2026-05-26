@@ -441,36 +441,41 @@
         let globalMaxPrice = 100000;
 
         async function loadProducts() {
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                allProducts = data.products || [];
-                const filters = data.filters || {};
-                
-                if (filters.marcas) {
-                    document.getElementById('marcaFilter').innerHTML = '<option value="">Todas las marcas</option>' + 
-                        filters.marcas.map(m => `<option value="${m}">${m}</option>`).join('');
-                }
-                if (filters.familias) {
-                    document.getElementById('familiaFilter').innerHTML = '<option value="">Todas las familias</option>' + 
-                        filters.familias.map(f => `<option value="${f}">${f}</option>`).join('');
-                }
-                if (filters.grupos) {
-                    document.getElementById('grupoFilter').innerHTML = '<option value="">Todos los grupos</option>' + 
-                        filters.grupos.map(g => `<option value="${g}">${g}</option>`).join('');
-                }
-                if (filters.priceRange) {
-                    globalMinPrice = filters.priceRange.min;
-                    globalMaxPrice = filters.priceRange.max;
-                    document.getElementById('minPrice').value = globalMinPrice;
-                    document.getElementById('maxPrice').value = globalMaxPrice;
-                }
-                applyFilters();
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('resultsContainer').innerHTML = '<div class="loading">Error al cargar productos</div>';
+    try {
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
             }
+        });
+        const data = await response.json();
+        allProducts = data.products || [];
+        const filters = data.filters || {};
+        
+        if (filters.marcas) {
+            document.getElementById('marcaFilter').innerHTML = '<option value="">Todas las marcas</option>' + 
+                filters.marcas.map(m => `<option value="${m}">${m}</option>`).join('');
         }
+        if (filters.familias) {
+            document.getElementById('familiaFilter').innerHTML = '<option value="">Todas las familias</option>' + 
+                filters.familias.map(f => `<option value="${f}">${f}</option>`).join('');
+        }
+        if (filters.grupos) {
+            document.getElementById('grupoFilter').innerHTML = '<option value="">Todos los grupos</option>' + 
+                filters.grupos.map(g => `<option value="${g}">${g}</option>`).join('');
+        }
+        if (filters.priceRange) {
+            globalMinPrice = filters.priceRange.min;
+            globalMaxPrice = filters.priceRange.max;
+            document.getElementById('minPrice').value = globalMinPrice;
+            document.getElementById('maxPrice').value = globalMaxPrice;
+        }
+        applyFilters();
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('resultsContainer').innerHTML = '<div class="loading">Error al cargar productos</div>';
+    }
+}
 
         function getCustomerType() {
             const selected = document.querySelector('input[name="customerType"]:checked');
